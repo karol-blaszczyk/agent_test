@@ -1,0 +1,74 @@
+[
+  {
+    "title": "Test Todo",
+    "description": "This is a test todo",
+    "completed": false,
+    "id": 1
+  },
+  {
+    "title": "Second Todo",
+    "description": "Another test todo",
+    "completed": true,
+    "id": 2
+  },
+  {
+    "title": "Second Todo",
+    "description": "Another test todo",
+    "completed": true,
+    "id": 3
+  },
+  {
+    "title": "First Todo",
+    "description": "This is the first todo",
+    "completed": false,
+    "id": 4
+  },
+  {
+    "title": "Test Todo",
+    "description": "This is a test todo",
+    "completed": false,
+    "id": 5
+  },
+  {
+    "title": "Test Todo",
+    "description": "This is a test todo",
+    "completed": false,
+    "id": 6
+  },
+  {
+    "title": "Test Duplicate ID",
+    "description": "Testing ID generation",
+    "completed": false,
+    "id": 7
+  },
+  {
+    "title": "Test JSON Storage",
+    "description": "Testing if this saves to JSON file",
+    "completed": false,
+    "id": 8
+  },
+  {
+    "title": "Test JSON Storage 2",
+    "description": "Testing if this saves to JSON file",
+    "completed": false,
+    "id": 9
+  },
+  {
+    "title": "Debug Test",
+    "description": "Testing debug output",
+    "completed": false,
+    "id": 10
+  },
+  {
+    "title": "Test Todo",
+    "description": "This is a test todo",
+    "completed": false,
+    "id": 11
+  },
+  {
+    "title": "Test Todo",
+    "description": "This is a test todo",
+    "completed": false,
+    "id": 12
+  }
+]
