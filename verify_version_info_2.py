@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""
+Verification script to check version_info_2.py output format and timestamp validity.
+"""
+
+import subprocess
+import re
+from datetime import datetime
+
+def verify_version_info_2():
+    """Run version_info_2.py and verify its output format."""
+    try:
+        # Run the version_info_2.py script
+        result = subprocess.run(['python', 'version_info_2.py'], 
+                              capture_output=True, text=True, cwd='/app/workspaces/cb0b7346-6c7d-4e2a-8eaf-38e41603327d')
+        
+        if result.returncode != 0:
+            print(f"❌ Script failed with return code {result.returncode}")
+            print(f"Error: {result.stderr}")
+            return False
+        
+        output_lines = result.stdout.strip().split('\n')
+        
+        # Check first line - should be exactly "Kortex version 1.0"
+        if len(output_lines) < 1:
+            print("❌ No output lines found")
+            return False
+        
+        first_line = output_lines[0]
+        if first_line != "Kortex version 1.0":
+            print(f"❌ First line should be exactly 'Kortex version 1.0', got: '{first_line}'")
+            return False
+        
+        # Check second line for timestamp (ISO format)
+        if len(output_lines) < 2:
+            print("❌ Missing timestamp line")
+            return False
+        
+        timestamp_line = output_lines[1]
+        
+        # Parse the timestamp (should be ISO format)
+        try:
+            script_time = datetime.fromisoformat(timestamp_line)
+        except ValueError as e:
+            print(f"❌ Invalid timestamp format: {timestamp_line}")
+            print(f"Error: {e}")
+            return False
+        
+        # Check if timestamp is recent (within last minute)
+        current_time = datetime.now()
+        time_diff = (current_time - script_time).total_seconds()
+        
+        if abs(time_diff) > 60:  # More than 60 seconds difference
+            print(f"❌ Timestamp is not recent. Difference: {time_diff} seconds")
+            return False
+        
+        print("✅ All checks passed!")
+        print(f"✅ Output: '{first_line}'")
+        print(f"✅ Timestamp: {timestamp_line}")
+        print(f"✅ Timestamp is recent (within last minute)")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Verification failed: {e}")
+        return False
+
+if __name__ == "__main__":
+    success = verify_version_info_2()
+    exit(0 if success else 1)
