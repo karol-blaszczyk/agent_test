@@ -26,3 +26,5 @@ python verify_hello_world.py
 ```
 
 Tested by Kortex
+
+Kortex Self-Heal Test
