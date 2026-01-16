@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Python Scripts{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold text-gray-800 mb-4">Python Script Dashboard</h2>
+        <p class="text-xl text-gray-600">Run and manage your Python scripts with ease</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Hello World Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <div class="h-32 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div class="text-white text-center">
+                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                    <h3 class="text-lg font-semibold">Hello World</h3>
+                </div>
+            </div>
+            <div class="p-6">
+                <h4 class="text-xl font-bold text-gray-800 mb-3">Hello World Script</h4>
+                <p class="text-gray-600 mb-4">A simple Python script that demonstrates basic output functionality. Perfect for testing your Python environment.</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Python</span>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">Basic</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full">Test</span>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="runScript('hello_world')" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
+                        Run Script
+                    </button>
+                    <button onclick="viewScript('hello_world')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                        View Code
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verify Hello World Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <div class="h-32 bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
+                <div class="text-white text-center">
+                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <h3 class="text-lg font-semibold">Verify Hello World</h3>
+                </div>
+            </div>
+            <div class="p-6">
+                <h4 class="text-xl font-bold text-gray-800 mb-3">Verify Hello World Script</h4>
+                <p class="text-gray-600 mb-4">A verification script that tests the hello_world.py script to ensure it's working correctly and producing expected output.</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">Verification</span>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Testing</span>
+                    <span class="px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full">Validation</span>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="runScript('verify_hello_world')" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium">
+                        Run Script
+                    </button>
+                    <button onclick="viewScript('verify_hello_world')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                        View Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results" class="mt-12 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Script Output</h3>
+            <div id="output" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                <div id="output-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function runScript(scriptName) {
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = 'Running...';
+    button.disabled = true;
+    
+    fetch(`/run/${scriptName}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        showResults(data.output || data.error || 'No output');
+        button.textContent = originalText;
+        button.disabled = false;
+    })
+    .catch(error => {
+        showResults(`Error: ${error.message}`);
+        button.textContent = originalText;
+        button.disabled = false;
+    });
+}
+
+function viewScript(scriptName) {
+    fetch(`/view/${scriptName}`)
+    .then(response => response.text())
+    .then(code => {
+        showResults(code, true);
+    })
+    .catch(error => {
+        showResults(`Error loading script: ${error.message}`);
+    });
+}
+
+function showResults(content, isCode = false) {
+    const resultsDiv = document.getElementById('results');
+    const outputContent = document.getElementById('output-content');
+    
+    resultsDiv.classList.remove('hidden');
+    
+    if (isCode) {
+        outputContent.innerHTML = `<pre class="whitespace-pre-wrap">${escapeHtml(content)}</pre>`;
+    } else {
+        outputContent.innerHTML = escapeHtml(content).replace(/\n/g, '<br>');
+    }
+    
+    // Scroll to results
+    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}
