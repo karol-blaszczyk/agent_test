@@ -3,6 +3,20 @@ Calculator module providing basic arithmetic operations.
 
 This module contains functions for addition, subtraction, multiplication,
 and division with proper error handling.
+
+Functions:
+    add(a, b): Add two numbers together
+    subtract(a, b): Subtract b from a  
+    multiply(a, b): Multiply two numbers together
+    divide(a, b): Divide a by b with zero-division protection
+
+Examples:
+    >>> add(2, 3)
+    5
+    >>> divide(10, 2)
+    5.0
+    >>> divide(5, 0)
+    ValueError: Cannot divide by zero
 """
 
 
