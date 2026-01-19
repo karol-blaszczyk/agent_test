@@ -12,15 +12,11 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 
 # Initialize Flask app
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-secret-key-change-in-production'
 
 # Get the current working directory
 WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Set the correct template folder path
-template_folder = os.path.join(WORKSPACE_DIR, 'templates')
-app.template_folder = template_folder
 
 @app.route('/')
 def index():
@@ -356,7 +352,7 @@ if __name__ == '__main__':
     # Development server configuration
     app.run(
         host='0.0.0.0',
-        port=5001,
+        port=5002,
         debug=True,
         threaded=True
     )

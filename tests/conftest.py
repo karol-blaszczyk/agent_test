@@ -8,7 +8,18 @@ It includes test client setup, database fixtures, and testing utilities.
 import pytest
 import tempfile
 import os
-from app import app as flask_app
+import sys
+import importlib.util
+
+# Import the Flask app from app.py using importlib to avoid package conflicts
+def import_flask_app():
+    """Import the Flask app from app.py file."""
+    spec = importlib.util.spec_from_file_location('flask_app', os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app.py'))
+    flask_app_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(flask_app_module)
+    return flask_app_module.app
+
+flask_app = import_flask_app()
 
 
 @pytest.fixture

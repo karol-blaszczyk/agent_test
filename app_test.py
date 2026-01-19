@@ -12,15 +12,11 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 
 # Initialize Flask app
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-secret-key-change-in-production'
 
 # Get the current working directory
 WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Set the correct template folder path
-template_folder = os.path.join(WORKSPACE_DIR, 'templates')
-app.template_folder = template_folder
 
 @app.route('/')
 def index():
@@ -272,20 +268,20 @@ def api_get_scripts():
     except Exception as e:
         return jsonify({'error': f'Failed to list scripts: {str(e)}'}), 500
 
-@app.route('/api/scripts/<name>/run', methods=['POST'])
-def api_run_script(name):
+@app.route('/api/run/<script_name>', methods=['POST'])
+def api_run_script(script_name):
     """
     API endpoint to run a Python script.
     
     Args:
-        name: Name of the script to run (without .py extension)
+        script_name: Name of the script to run (without .py extension)
     
     Returns:
         JSON response with execution results
     """
     try:
         # Construct script path
-        script_file = f'{name}.py'
+        script_file = f'{script_name}.py'
         script_path = os.path.join(WORKSPACE_DIR, script_file)
         
         # Check if script exists
@@ -297,7 +293,7 @@ def api_run_script(name):
             return jsonify({'error': 'Only Python scripts are supported'}), 400
         
         # Skip certain files that shouldn't be run
-        if name.startswith('test_') or name == 'app':
+        if script_name.startswith('test_') or script_name == 'app':
             return jsonify({'error': 'This script cannot be executed via API'}), 400
         
         # Run the script
@@ -311,7 +307,7 @@ def api_run_script(name):
         
         # Prepare response
         execution_result = {
-            'script_name': name,
+            'script_name': script_name,
             'status': 'success' if result.returncode == 0 else 'error',
             'return_code': result.returncode,
             'stdout': result.stdout,
@@ -328,13 +324,13 @@ def api_run_script(name):
     except subprocess.TimeoutExpired:
         return jsonify({
             'error': 'Script execution timed out after 30 seconds',
-            'script_name': name,
+            'script_name': script_name,
             'status': 'timeout'
         }), 500
     except Exception as e:
         return jsonify({
             'error': f'Internal server error: {str(e)}',
-            'script_name': name,
+            'script_name': script_name,
             'status': 'error'
         }), 500
 

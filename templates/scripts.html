@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Scripts - Python Scripts{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold text-gray-800 mb-4">Available Scripts</h2>
+        <p class="text-xl text-gray-600">Browse and manage your Python scripts</p>
+    </div>
+
+    {% if error %}
+    <!-- Error Message -->
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-8">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>{{ error }}</span>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if scripts %}
+    <!-- Scripts Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for script in scripts %}
+        <!-- Script Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <!-- Card Header -->
+            <div class="h-32 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+                <div class="text-white text-center">
+                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                    <h3 class="text-lg font-semibold truncate px-2">{{ script.name.replace('_', ' ').title() }}</h3>
+                </div>
+            </div>
+            
+            <!-- Card Content -->
+            <div class="p-6">
+                <h4 class="text-xl font-bold text-gray-800 mb-3">{{ script.name.replace('_', ' ').title() }}</h4>
+                <p class="text-gray-600 mb-4 text-sm leading-relaxed">{{ script.description }}</p>
+                
+                <!-- Script Metadata -->
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center text-sm text-gray-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span>{{ "%.1f"|format(script.file_size / 1024) }} KB</span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Modified: {{ script.modified_at }}</span>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-2">
+                    <button onclick="runScript('{{ script.name }}')" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-sm">
+                        Run Script
+                    </button>
+                    <button onclick="viewScript('{{ script.name }}')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm">
+                        View Code
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Scripts Message -->
+    <div class="text-center py-12">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">No Scripts Found</h3>
+        <p class="text-gray-500">No Python scripts are available in the workspace.</p>
+    </div>
+    {% endif %}
+
+    <!-- Results Section -->
+    <div id="results" class="mt-12 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Script Output</h3>
+            <div id="output" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                <div id="output-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function runScript(scriptName) {
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = 'Running...';
+    button.disabled = true;
+    
+    fetch(`/run/${scriptName}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        showResults(data.output || data.error || 'No output');
+        button.textContent = originalText;
+        button.disabled = false;
+    })
+    .catch(error => {
+        showResults(`Error: ${error.message}`);
+        button.textContent = originalText;
+        button.disabled = false;
+    });
+}
+
+function viewScript(scriptName) {
+    fetch(`/view/${scriptName}`)
+    .then(response => response.text())
+    .then(code => {
+        showResults(code, true);
+    })
+    .catch(error => {
+        showResults(`Error loading script: ${error.message}`);
+    });
+}
+
+function showResults(content, isCode = false) {
+    const resultsDiv = document.getElementById('results');
+    const outputContent = document.getElementById('output-content');
+    
+    resultsDiv.classList.remove('hidden');
+    
+    if (isCode) {
+        outputContent.innerHTML = `<pre class="whitespace-pre-wrap">${escapeHtml(content)}</pre>`;
+    } else {
+        outputContent.innerHTML = escapeHtml(content).replace(/\n/g, '<br>');
+    }
+    
+    // Scroll to results
+    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Add active state to navigation
+window.addEventListener('DOMContentLoaded', function() {
+    // Highlight the Scripts navigation item
+    const currentPath = window.location.pathname;
+    if (currentPath === '/scripts') {
+        const navLinks = document.querySelectorAll('nav a[href="/scripts"]');
+        navLinks.forEach(link => {
+            link.classList.add('text-blue-600');
+            link.classList.remove('text-gray-700');
+        });
+    }
+});
+</script>
+{% endblock %}
