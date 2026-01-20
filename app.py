@@ -27,6 +27,11 @@ def index():
     """Render the main dashboard page."""
     return render_template('index.html')
 
+@app.route('/hello')
+def hello():
+    """Render the hello world page."""
+    return render_template('hello.html')
+
 @app.route('/scripts')
 def scripts():
     """Render the scripts listing page."""
@@ -356,7 +361,7 @@ if __name__ == '__main__':
     # Development server configuration
     app.run(
         host='0.0.0.0',
-        port=5001,
+        port=5021,  # Changed to avoid port conflicts
         debug=True,
         threaded=True
     )
